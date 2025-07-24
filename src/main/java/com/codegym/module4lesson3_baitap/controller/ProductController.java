@@ -1,57 +1,75 @@
+
 package com.codegym.module4lesson3_baitap.controller;
 
 import com.codegym.module4lesson3_baitap.model.Product;
 import com.codegym.module4lesson3_baitap.service.IProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.codegym.module4lesson3_baitap.service.ProductService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
-@RequestMapping("/view")
+@RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
-    private IProductService productService;
+    private final IProductService productService = new ProductService();
 
-    @GetMapping
-    public String showList(@RequestParam(required = false) String search, Model model) {
-        if (search != null && !search.isEmpty()) {
-            model.addAttribute("products", productService.searchByName(search));
-        } else {
-            model.addAttribute("products", productService.findAll());
-        }
-        return "/list";
+    @GetMapping("")
+    public String index(Model model) {
+        List<Product> productList = productService.findAll();
+        model.addAttribute("products", productList);
+        return "/index";
     }
 
     @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("product", new Product());
+    public String create(Model model) {
+        Product product = new Product();
+        model.addAttribute("product", product);
         return "/create";
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute Product product) {
+    public String save(Product product) {
+        product.setId((int) (Math.random() * 10000));
         productService.save(product);
-        return "redirect:/view";
+        return "redirect:/products";
     }
 
+    @GetMapping("/search")
+    public String search(@RequestParam String name, Model model) {
+        List<Product> products = productService.searchByName(name);
+        model.addAttribute("products", products);
+        return "/index";
+    }
+
+
+
     @GetMapping("/{id}/edit")
-    public String edit(@PathVariable int id, Model model) {
+    public String update(@PathVariable int id, Model model) {
         model.addAttribute("product", productService.findById(id));
-        return "/edit";
+        return "/update";
     }
 
     @PostMapping("/update")
-    public String update(@ModelAttribute Product product) {
+    public String update(Product product) {
         productService.update(product.getId(), product);
-        return "redirect:/view";
+        return "redirect:/products";
     }
 
     @GetMapping("/{id}/delete")
-    public String delete(@PathVariable int id) {
-        productService.delete(id);
-        return "redirect:/view";
+    public String delete(@PathVariable int id, Model model) {
+        model.addAttribute("product", productService.findById(id));
+        return "/delete";
+    }
+
+    @PostMapping("/delete")
+    public String delete(Product product, RedirectAttributes redirectAttributes) {
+        productService.remove(product.getId());
+        redirectAttributes.addFlashAttribute("success", "Removed customer successfully!");
+        return "redirect:/products";
     }
 
     @GetMapping("/{id}/view")
@@ -59,4 +77,6 @@ public class ProductController {
         model.addAttribute("product", productService.findById(id));
         return "/view";
     }
+
+
 }

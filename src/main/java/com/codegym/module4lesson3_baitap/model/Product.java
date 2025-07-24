@@ -1,3 +1,4 @@
+
 package com.codegym.module4lesson3_baitap.model;
 
 public class Product {
@@ -9,6 +10,7 @@ public class Product {
 
     public Product() {
     }
+
     public Product(int id, String name, double price, String description, String manufacturer) {
         this.id = id;
         this.name = name;

@@ -1,45 +1,58 @@
+
 package com.codegym.module4lesson3_baitap.service;
 
 import com.codegym.module4lesson3_baitap.model.Product;
-import org.springframework.stereotype.Service;
-
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-@Service
 public class ProductService implements IProductService {
-    private static List<Product> products = new ArrayList<>();
-    private static int nextId = 1;
+
+    private static final Map<Integer, Product> products;
 
     static {
-        products.add(new Product(nextId++, "iPhone", 999, "Apple smartphone", "Apple"));
-        products.add(new Product(nextId++, "Galaxy", 899, "Samsung smartphone", "Samsung"));
+        products = new HashMap<Integer, Product>();
+        products.put(1, new Product(1, "Iphone 11", 12000000, "sale mạnh", "apple"));
+        products.put(2, new Product(2, "Samsung s23", 25000000, "giá ưu đãi", "samsung"));
+        products.put(3, new Product(3, "Iphone 15", 22000000, "sang trọng", "apple"));
+        products.put(4, new Product(4, "Oppo x8 Pro", 15000000, "đẹp", "oppo"));
     }
 
-    public List<Product> findAll() { return products; }
-    public Product findById(int id) {
-        return products.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+    @Override
+    public List<Product> findAll() {
+        return new ArrayList<>(products.values());
     }
+
+    @Override
     public void save(Product product) {
-        product.setId(nextId++);
-        products.add(product);
+        products.put(product.getId(), product);
     }
+
+    @Override
+    public Product findById(int id) {
+        return products.get(id);
+    }
+
+    @Override
     public void update(int id, Product product) {
-        Product existing = findById(id);
-        if (existing != null) {
-            existing.setName(product.getName());
-            existing.setPrice(product.getPrice());
-            existing.setDescription(product.getDescription());
-        }
+        products.put(id, product);
     }
-    public void delete(int id) {
-        products.removeIf(p -> p.getId() == id);
+
+    @Override
+    public void remove(int id) {
+        products.remove(id);
     }
+
+    @Override
     public List<Product> searchByName(String name) {
-        return products.stream()
-            .filter(p -> p.getName().toLowerCase().contains(name.toLowerCase()))
-            .collect(Collectors.toList());
+        List<Product> result = new ArrayList<>();
+        for (Product product : products.values()) {
+            if (product.getName().toLowerCase().contains(name.toLowerCase())) {
+                result.add(product);
+            }
+        }
+        return result;
     }
 }
